@@ -1,0 +1,9 @@
+<stack>
+  <description brief="gps_umd">GPS messages and libraries</description>
+  <author>Ken Tossell</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/gps_umd</url>
+  <depend stack="ros" />
+
+</stack>

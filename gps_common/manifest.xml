@@ -1,0 +1,14 @@
+<package>
+  <description brief="gps_common">
+
+    GPS messages and common routines for use in GPS drivers
+
+  </description>
+  <author>Ken Tossell</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/gps_common</url>
+
+</package>
+
+
