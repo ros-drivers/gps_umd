@@ -9,15 +9,6 @@ float64 longitude
 # Altitude (meters). Positive is above reference (e.g., sea level).
 float64 altitude
 
-# UTM WGS84 coordinates: easting (meters)
-float64 utm_e
-
-# UTM WGS84 coordinates: northing (meters)
-float64 utm_n
-
-# UTM zone
-string utm_zone
-
 # Direction (degrees from north)
 float64 track
 
@@ -71,17 +62,8 @@ float64 err_climb
 # Temporal uncertainty [ept]
 float64 err_time
 
-# Satellites used in solution
-uint16 satellites # Number of satellites
-int32[] satellite_prn # PRN identifiers
-int32[] satellite_z # Elevation of satellites
-int32[] satellite_azimuth # Azimuth of satellites
-int32[] satellite_snr # Signal-to-noise ratios (dB)
-
-# Measurement status
-uint16 STATUS_NO_FIX=0   # Unable to fix position
-uint16 STATUS_FIX=1      # Normal fix
-uint16 STATUS_DGPS_FIX=3 # Fixed with DGPS
-uint16 STATUS_WAAS_FIX=5 # Fixed with WAAS
-uint16 status
+# Orientation uncertainty (degrees)
+float64 err_pitch
+float64 err_roll
+float64 err_dip
 
