@@ -1,0 +1,10 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+\section usage Usage
+
+\b gpsd_client relays GPS readings into ROS from the \b gpsd program. \b gpsd
+should be running before this node is started.
+
+*/

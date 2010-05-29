@@ -1,0 +1,16 @@
+<package>
+  <description brief="gpsd_client">
+
+     gpsd_client
+
+  </description>
+  <author>Rob Thomson</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/gpsd_client</url>
+  <depend package="roscpp"/>
+  <depend package="gps_common"/>
+  <rosdep name="gpsd"/>
+</package>
+
+

@@ -1,0 +1,2 @@
+gpsd:
+  ubuntu: gpsd libgps-dev

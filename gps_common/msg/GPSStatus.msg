@@ -1,11 +1,15 @@
 Header header
 
 # Satellites used in solution
-uint16 satellites # Number of satellites
-int32[] satellite_prn # PRN identifiers
-int32[] satellite_z # Elevation of satellites
-int32[] satellite_azimuth # Azimuth of satellites
-int32[] satellite_snr # Signal-to-noise ratios (dB)
+uint16 satellites_used # Number of satellites
+int32[] satellite_used_prn # PRN identifiers
+
+# Satellites visible
+uint16 satellites_visible
+int32[] satellite_visible_prn # PRN identifiers
+int32[] satellite_visible_z # Elevation of satellites
+int32[] satellite_visible_azimuth # Azimuth of satellites
+int32[] satellite_visible_snr # Signal-to-noise ratios (dB)
 
 # Measurement status
 uint16 STATUS_NO_FIX=0   # Unable to fix position

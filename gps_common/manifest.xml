@@ -8,7 +8,9 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/gps_common</url>
-
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp -I${prefix}/srv/cpp" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib"/>
+  </export>
 </package>
 
 
