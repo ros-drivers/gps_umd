@@ -29,7 +29,13 @@ class GPSDClient {
         return false;
       }
 
+#if GPSD_API_MAJOR_VERSION == 4
+      resp = gps.stream(WATCH_ENABLE);
+#elif GPSD_API_MAJOR_VERSION == 3
       gps.query("w\n");
+#else
+#error "gpsd_client only supports gpsd API versions 3 and 4"
+#endif
 
       ROS_INFO("GPSd opened");
       return true;
@@ -73,9 +79,9 @@ class GPSDClient {
         status.satellite_used_prn[i] = p->used[i];
       }
 
-#if GPSD_API_MAJOR_VERSION > 3
+#if GPSD_API_MAJOR_VERSION == 4
 #define SATS_VISIBLE p->satellites_visible
-#else
+#elif GPSD_API_MAJOR_VERSION == 3
 #define SATS_VISIBLE p->satellites
 #endif
 
