@@ -1,19 +1,40 @@
 #include <ros/ros.h>
 #include <gps_common/GPSFix.h>
 #include <gps_common/GPSStatus.h>
+#include <gps_common/NavSatFix.h>
+#include <gps_common/NavSatStatus.h>
 #include <libgpsmm.h>
 
 using namespace gps_common;
 
 class GPSDClient {
   public:
-    GPSDClient() : privnode("~") {
+    enum msg_type { GPS, NAVSAT };
 
-    }
+    GPSDClient() : privnode("~") {}
 
     bool start() {
-      status_pub = node.advertise<GPSStatus>("status", 1);
-      fix_pub = node.advertise<GPSFix>("fix", 1);
+      std::string report_as_text = "gps";
+      privnode.getParam("report_as", report_as_text);
+
+      if (report_as_text == "gps")
+        report_as = GPS;
+      else if (report_as_text == "navsat")
+        report_as = NAVSAT;
+      else {
+        ROS_ERROR("Invalid report_as method: %s", report_as_text.c_str());
+        return false;
+      }
+
+      switch (report_as) {
+        case GPS:
+          gps_status_pub = node.advertise<GPSStatus>("status", 1);
+          gps_fix_pub = node.advertise<GPSFix>("fix", 1);
+          break;
+        case NAVSAT:
+          navsat_fix_pub = node.advertise<NavSatFix>("fix", 1);
+          break;
+      }
 
       std::string host = "localhost";
       int port = 2947;
@@ -53,9 +74,11 @@ class GPSDClient {
   private:
     ros::NodeHandle node;
     ros::NodeHandle privnode;
-    ros::Publisher status_pub;
-    ros::Publisher fix_pub;
+    ros::Publisher gps_status_pub;
+    ros::Publisher gps_fix_pub;
+    ros::Publisher navsat_fix_pub;
     gpsmm gps;
+    msg_type report_as;
 
     void process_data(struct gps_data_t* p) {
       if (p == NULL)
@@ -64,6 +87,24 @@ class GPSDClient {
       if (!p->online)
         return;
 
+      switch (report_as) {
+        case GPS:
+          process_data_gps(p);
+          break;
+        case NAVSAT:
+          process_data_navsat(p);
+          break;
+      }
+    }
+
+
+#if GPSD_API_MAJOR_VERSION == 4
+#define SATS_VISIBLE p->satellites_visible
+#elif GPSD_API_MAJOR_VERSION == 3
+#define SATS_VISIBLE p->satellites
+#endif
+
+    void process_data_gps(struct gps_data_t* p) {
       ros::Time time = ros::Time::now();
 
       GPSStatus status;
@@ -78,12 +119,6 @@ class GPSDClient {
       for (int i = 0; i < status.satellites_used; ++i) {
         status.satellite_used_prn[i] = p->used[i];
       }
-
-#if GPSD_API_MAJOR_VERSION == 4
-#define SATS_VISIBLE p->satellites_visible
-#elif GPSD_API_MAJOR_VERSION == 3
-#define SATS_VISIBLE p->satellites
-#endif
 
       status.satellites_visible = SATS_VISIBLE;
 
@@ -139,8 +174,45 @@ class GPSDClient {
         /* TODO: attitude */
       // }
 
-      status_pub.publish(status);
-      fix_pub.publish(fix);
+      gps_status_pub.publish(status);
+      gps_fix_pub.publish(fix);
+    }
+
+    void process_data_navsat(struct gps_data_t* p) {
+      NavSatFixPtr fix(new NavSatFix);
+
+      /* TODO: Support SBAS and other GBAS. */
+      fix->header.stamp = ros::Time(p->fix.time);
+
+      /* gpsmm pollutes the global namespace with STATUS_,
+       * so we need to use the ROS message's integer values
+       * for status.status
+       */
+      switch (p->status) {
+        case STATUS_NO_FIX:
+          fix->status.status = -1; // NavSatStatus::STATUS_NO_FIX;
+          break;
+        case STATUS_FIX:
+          fix->status.status = 0; // NavSatStatus::STATUS_FIX;
+          break;
+        case STATUS_DGPS_FIX:
+          fix->status.status = 2; // NavSatStatus::STATUS_GBAS_FIX;
+          break;
+      }
+
+      fix->status.service = NavSatStatus::SERVICE_GPS;
+
+      fix->latitude = p->fix.latitude;
+      fix->longitude = p->fix.longitude;
+      fix->altitude = p->fix.altitude;
+
+      fix->position_covariance[0] = p->fix.epx;
+      fix->position_covariance[4] = p->fix.epy;
+      fix->position_covariance[8] = p->fix.epv;
+
+      fix->position_covariance_type = NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;
+
+      navsat_fix_pub.publish(fix);
     }
 };
 
