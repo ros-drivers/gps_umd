@@ -1,9 +1,10 @@
 <stack>
   <description brief="gps_umd">GPS messages and libraries</description>
   <author>Ken Tossell</author>
-  <license>BSD</license>
+  <license>BSD</license>  
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/gps_umd</url>
-  <depend stack="ros" />
+  <depend stack="common_msgs" /> <!-- nav_msgs -->
+  <depend stack="ros" /> <!-- roscpp, message_filters -->
 
 </stack>
