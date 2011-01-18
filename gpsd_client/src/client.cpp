@@ -1,11 +1,12 @@
 #include <ros/ros.h>
 #include <gps_common/GPSFix.h>
 #include <gps_common/GPSStatus.h>
-#include <gps_common/NavSatFix.h>
-#include <gps_common/NavSatStatus.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/NavSatStatus.h>
 #include <libgpsmm.h>
 
 using namespace gps_common;
+using namespace sensor_msgs;
 
 class GPSDClient {
   public:
@@ -14,7 +15,7 @@ class GPSDClient {
     GPSDClient() : privnode("~") {}
 
     bool start() {
-      std::string report_as_text = "gps";
+      std::string report_as_text = "navsat";
       privnode.getParam("report_as", report_as_text);
 
       if (report_as_text == "gps")
