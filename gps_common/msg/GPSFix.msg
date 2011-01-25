@@ -1,9 +1,12 @@
+# A more complete GPS fix to supplement sensor_msgs/NavSatFix.
 Header header
+
+GPSStatus status
 
 # Latitude (degrees). Positive is north of equator; negative is south.
 float64 latitude
 
-# Longitude (degrees). Positive is east of prime meridian, negative south.
+# Longitude (degrees). Positive is east of prime meridian, negative west.
 float64 longitude
 
 # Altitude (meters). Positive is above reference (e.g., sea level).
@@ -26,6 +29,8 @@ float64 dip
 # GPS time
 float64 time
 
+## Dilution of precision; Xdop<=0 means the value is unknown
+
 # Total (positional-temporal) dilution of precision
 float64 gdop
 
@@ -40,6 +45,8 @@ float64 vdop
 
 # Temporal dilution of precision
 float64 tdop
+
+## Uncertainty of measurement, 95% confidence
 
 # Spherical position uncertainty (meters) [epe]
 float64 err
@@ -66,4 +73,17 @@ float64 err_time
 float64 err_pitch
 float64 err_roll
 float64 err_dip
+
+# Position covariance [m^2] defined relative to a tangential plane
+# through the reported position. The components are East, North, and
+# Up (ENU), in row-major order.
+
+float64[9] position_covariance
+
+uint8 COVARIANCE_TYPE_UNKNOWN = 0
+uint8 COVARIANCE_TYPE_APPROXIMATED = 1
+uint8 COVARIANCE_TYPE_DIAGONAL_KNOWN = 2
+uint8 COVARIANCE_TYPE_KNOWN = 3
+
+uint8 position_covariance_type
 

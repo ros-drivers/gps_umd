@@ -1,5 +1,8 @@
 <stack>
-  <description brief="gps_umd">GPS messages and libraries</description>
+  <description brief="GPS drivers (incl. GPSd) and map projection utilities">
+    This stack provides a ROS binding for the GPS receivers that are supported
+    by the GPSd software (http://gpsd.berlios.de/).
+  </description>
   <author>Ken Tossell</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
