@@ -12,13 +12,13 @@ int32[] satellite_visible_azimuth # Azimuth of satellites
 int32[] satellite_visible_snr # Signal-to-noise ratios (dB)
 
 # Measurement status
-uint16 STATUS_NO_FIX=-1   # Unable to fix position
-uint16 STATUS_FIX=0       # Normal fix
-uint16 STATUS_SBAS_FIX=1  # Fixed using a satellite-based augmentation system
-uint16 STATUS_GBAS_FIX=2  #          or a ground-based augmentation system
-uint16 STATUS_DGPS_FIX=18 # Fixed with DGPS
-uint16 STATUS_WAAS_FIX=33 # Fixed with WAAS
-uint16 status
+int16 STATUS_NO_FIX=-1   # Unable to fix position
+int16 STATUS_FIX=0       # Normal fix
+int16 STATUS_SBAS_FIX=1  # Fixed using a satellite-based augmentation system
+int16 STATUS_GBAS_FIX=2  #          or a ground-based augmentation system
+int16 STATUS_DGPS_FIX=18 # Fixed with DGPS
+int16 STATUS_WAAS_FIX=33 # Fixed with WAAS
+int16 status
 
 uint16 SOURCE_NONE=0 # No information is available
 uint16 SOURCE_GPS=1 # Using standard GPS location [only valid for position_source]

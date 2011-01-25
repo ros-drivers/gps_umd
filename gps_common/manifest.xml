@@ -4,7 +4,7 @@
     GPS messages and common routines for use in GPS drivers
 
   </description>
-  <author>Ken Tossell</author>
+  <author>Maintained by Ken Tossell</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/gps_common</url>

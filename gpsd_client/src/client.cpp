@@ -10,32 +10,11 @@ using namespace sensor_msgs;
 
 class GPSDClient {
   public:
-    enum msg_type { GPS, NAVSAT };
-
     GPSDClient() : privnode("~") {}
 
     bool start() {
-      std::string report_as_text = "navsat";
-      privnode.getParam("report_as", report_as_text);
-
-      if (report_as_text == "gps")
-        report_as = GPS;
-      else if (report_as_text == "navsat")
-        report_as = NAVSAT;
-      else {
-        ROS_ERROR("Invalid report_as method: %s", report_as_text.c_str());
-        return false;
-      }
-
-      switch (report_as) {
-        case GPS:
-          gps_status_pub = node.advertise<GPSStatus>("status", 1);
-          gps_fix_pub = node.advertise<GPSFix>("fix", 1);
-          break;
-        case NAVSAT:
-          navsat_fix_pub = node.advertise<NavSatFix>("fix", 1);
-          break;
-      }
+      gps_fix_pub = node.advertise<GPSFix>("extended_fix", 1);
+      navsat_fix_pub = node.advertise<NavSatFix>("fix", 1);
 
       std::string host = "localhost";
       int port = 2947;
@@ -75,11 +54,9 @@ class GPSDClient {
   private:
     ros::NodeHandle node;
     ros::NodeHandle privnode;
-    ros::Publisher gps_status_pub;
     ros::Publisher gps_fix_pub;
     ros::Publisher navsat_fix_pub;
     gpsmm gps;
-    msg_type report_as;
 
     void process_data(struct gps_data_t* p) {
       if (p == NULL)
@@ -88,14 +65,8 @@ class GPSDClient {
       if (!p->online)
         return;
 
-      switch (report_as) {
-        case GPS:
-          process_data_gps(p);
-          break;
-        case NAVSAT:
-          process_data_navsat(p);
-          break;
-      }
+      process_data_gps(p);
+      process_data_navsat(p);
     }
 
 
@@ -108,8 +79,8 @@ class GPSDClient {
     void process_data_gps(struct gps_data_t* p) {
       ros::Time time = ros::Time::now();
 
-      GPSStatus status;
       GPSFix fix;
+      GPSStatus status;
 
       status.header.stamp = time;
       fix.header.stamp = time;
@@ -135,14 +106,13 @@ class GPSDClient {
         status.satellite_visible_snr[i] = p->ss[i];
       }
 
-      if (p->status & STATUS_FIX)
-        status.status |= 1; // FIXME: gpsmm puts its constants in the global
-                            // namespace, so `GPSStatus::STATUS_FIX' is illegal.
+      if (p->status & STATUS_FIX) {
+        status.status = 0; // FIXME: gpsmm puts its constants in the global
+                           // namespace, so `GPSStatus::STATUS_FIX' is illegal.
 
-      if (p->status & STATUS_DGPS_FIX)
-        status.status |= 3; // same here
+        if (p->status & STATUS_DGPS_FIX)
+          status.status |= 18; // same here
 
-      // if (status.status) {
         fix.time = p->fix.time;
         fix.latitude = p->fix.latitude;
         fix.longitude = p->fix.longitude;
@@ -173,9 +143,12 @@ class GPSDClient {
         fix.err_time = p->fix.ept;
 
         /* TODO: attitude */
-      // }
+      } else {
+      	status.status = -1; // STATUS_NO_FIX
+      }
 
-      gps_status_pub.publish(status);
+      fix.status = status;
+
       gps_fix_pub.publish(fix);
     }
 
