@@ -15,6 +15,7 @@
   <depend package="roscpp"/>
   <depend package="message_filters"/>
   <depend package="nav_msgs"/>
+  <depend package="sensor_msgs"/>
 </package>
 
 
