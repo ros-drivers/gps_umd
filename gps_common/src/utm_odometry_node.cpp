@@ -13,12 +13,16 @@
 using namespace gps_common;
 
 static ros::Publisher odom_pub;
-std::string frame_id;
+std::string frame_id, child_frame_id;
 double rot_cov;
 
 void callback(const sensor_msgs::NavSatFixConstPtr& fix) {
   if (fix->status.status == sensor_msgs::NavSatStatus::STATUS_NO_FIX) {
     ROS_INFO("No fix.");
+    return;
+  }
+
+  if (fix->header.stamp == ros::Time(0)) {
     return;
   }
 
@@ -35,6 +39,8 @@ void callback(const sensor_msgs::NavSatFixConstPtr& fix) {
       odom.header.frame_id = fix->header.frame_id;
     else
       odom.header.frame_id = frame_id;
+
+    odom.child_frame_id = child_frame_id;
 
     odom.pose.pose.position.x = easting;
     odom.pose.pose.position.y = northing;
@@ -76,6 +82,7 @@ int main (int argc, char **argv) {
   ros::NodeHandle priv_node("~");
 
   priv_node.param<std::string>("frame_id", frame_id, "");
+  priv_node.param<std::string>("child_frame_id", child_frame_id, "");
   priv_node.param<double>("rot_covariance", rot_cov, 99999.0);
 
   odom_pub = node.advertise<nav_msgs::Odometry>("odom", 10);
