@@ -10,11 +10,13 @@ using namespace sensor_msgs;
 
 class GPSDClient {
   public:
-    GPSDClient() : privnode("~") {}
+    GPSDClient() : privnode("~"), use_gps_time(true) {}
 
     bool start() {
       gps_fix_pub = node.advertise<GPSFix>("extended_fix", 1);
       navsat_fix_pub = node.advertise<NavSatFix>("fix", 1);
+
+      privnode.getParam("use_gps_time", use_gps_time);
 
       std::string host = "localhost";
       int port = 2947;
@@ -57,6 +59,8 @@ class GPSDClient {
     ros::Publisher gps_fix_pub;
     ros::Publisher navsat_fix_pub;
     gpsmm gps;
+
+    bool use_gps_time;
 
     void process_data(struct gps_data_t* p) {
       if (p == NULL)
@@ -106,7 +110,7 @@ class GPSDClient {
         status.satellite_visible_snr[i] = p->ss[i];
       }
 
-      if (p->status & STATUS_FIX) {
+      if ((p->status & STATUS_FIX) && !isnan(p->fix.epx)) {
         status.status = 0; // FIXME: gpsmm puts its constants in the global
                            // namespace, so `GPSStatus::STATUS_FIX' is illegal.
 
@@ -156,7 +160,11 @@ class GPSDClient {
       NavSatFixPtr fix(new NavSatFix);
 
       /* TODO: Support SBAS and other GBAS. */
-      fix->header.stamp = ros::Time(p->fix.time);
+
+      if (use_gps_time)
+        fix->header.stamp = ros::Time(p->fix.time);
+      else
+        fix->header.stamp = ros::Time::now();
 
       /* gpsmm pollutes the global namespace with STATUS_,
        * so we need to use the ROS message's integer values
@@ -179,6 +187,14 @@ class GPSDClient {
       fix->latitude = p->fix.latitude;
       fix->longitude = p->fix.longitude;
       fix->altitude = p->fix.altitude;
+
+      /* gpsd reports status=OK even when there is no current fix,
+       * as long as there has been a fix previously. Throw out these
+       * fake results, which have NaN variance
+       */
+      if (isnan(p->fix.epx)) {
+        return;
+      }
 
       fix->position_covariance[0] = p->fix.epx;
       fix->position_covariance[4] = p->fix.epy;
