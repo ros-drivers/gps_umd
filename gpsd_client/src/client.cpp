@@ -10,13 +10,14 @@ using namespace sensor_msgs;
 
 class GPSDClient {
   public:
-    GPSDClient() : privnode("~"), use_gps_time(true) {}
+    GPSDClient() : privnode("~"), use_gps_time(true), check_fix_by_variance(true) {}
 
     bool start() {
       gps_fix_pub = node.advertise<GPSFix>("extended_fix", 1);
       navsat_fix_pub = node.advertise<NavSatFix>("fix", 1);
 
       privnode.getParam("use_gps_time", use_gps_time);
+      privnode.getParam("check_fix_by_variance", check_fix_by_variance);
 
       std::string host = "localhost";
       int port = 2947;
@@ -61,6 +62,7 @@ class GPSDClient {
     gpsmm gps;
 
     bool use_gps_time;
+    bool check_fix_by_variance;
 
     void process_data(struct gps_data_t* p) {
       if (p == NULL)
@@ -110,7 +112,7 @@ class GPSDClient {
         status.satellite_visible_snr[i] = p->ss[i];
       }
 
-      if ((p->status & STATUS_FIX) && !isnan(p->fix.epx)) {
+      if ((p->status & STATUS_FIX) && !(check_fix_by_variance && isnan(p->fix.epx))) {
         status.status = 0; // FIXME: gpsmm puts its constants in the global
                            // namespace, so `GPSStatus::STATUS_FIX' is illegal.
 
@@ -192,7 +194,7 @@ class GPSDClient {
        * as long as there has been a fix previously. Throw out these
        * fake results, which have NaN variance
        */
-      if (isnan(p->fix.epx)) {
+      if (isnan(p->fix.epx) && check_fix_by_variance) {
         return;
       }
 
