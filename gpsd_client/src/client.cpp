@@ -10,7 +10,7 @@ using namespace sensor_msgs;
 
 class GPSDClient {
   public:
-    GPSDClient() : privnode("~"), use_gps_time(true), check_fix_by_variance(true) {}
+    GPSDClient() : privnode("~"), gps(NULL), use_gps_time(true), check_fix_by_variance(true) {}
 
     bool start() {
       gps_fix_pub = node.advertise<GPSFix>("extended_fix", 1);
@@ -27,26 +27,35 @@ class GPSDClient {
       char port_s[12];
       snprintf(port_s, 12, "%d", port);
 
-      gps_data_t *resp = gps.open(host.c_str(), port_s);
+      gps_data_t *resp = NULL;
+
+#if GPSD_API_MAJOR_VERSION >= 5
+      gps = new gpsmm(host.c_str(), port_s);
+#elif GPSD_API_MAJOR_VERSION == 4
+      gps = new gpsmm();
+      gps->open(host.c_str(), port_s);
+      resp = gps->stream(WATCH_ENABLE);
+#else
+      gps = new gpsmm();
+      resp = gps->open(host.c_str(), port_s);
+      gps->query("w\n");
+#endif
+
       if (resp == NULL) {
         ROS_ERROR("Failed to open GPSd");
         return false;
       }
-
-#if GPSD_API_MAJOR_VERSION == 4
-      resp = gps.stream(WATCH_ENABLE);
-#elif GPSD_API_MAJOR_VERSION == 3
-      gps.query("w\n");
-#else
-#error "gpsd_client only supports gpsd API versions 3 and 4"
-#endif
 
       ROS_INFO("GPSd opened");
       return true;
     }
 
     void step() {
-      gps_data_t *p = gps.poll();
+#if GPSD_API_MAJOR_VERSION >= 5
+      gps_data_t *p = gps->read();
+#else
+      gps_data_t *p = gps->poll();
+#endif
       process_data(p);
     }
 
@@ -59,7 +68,7 @@ class GPSDClient {
     ros::NodeHandle privnode;
     ros::Publisher gps_fix_pub;
     ros::Publisher navsat_fix_pub;
-    gpsmm gps;
+    gpsmm *gps;
 
     bool use_gps_time;
     bool check_fix_by_variance;
@@ -76,10 +85,12 @@ class GPSDClient {
     }
 
 
-#if GPSD_API_MAJOR_VERSION == 4
+#if GPSD_API_MAJOR_VERSION >= 4
 #define SATS_VISIBLE p->satellites_visible
 #elif GPSD_API_MAJOR_VERSION == 3
 #define SATS_VISIBLE p->satellites
+#else
+#error "gpsd_client only supports gpsd API versions 3+"
 #endif
 
     void process_data_gps(struct gps_data_t* p) {
