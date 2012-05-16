@@ -31,6 +31,7 @@ class GPSDClient {
 
 #if GPSD_API_MAJOR_VERSION >= 5
       gps = new gpsmm(host.c_str(), port_s);
+      resp = gps->stream(WATCH_ENABLE);
 #elif GPSD_API_MAJOR_VERSION == 4
       gps = new gpsmm();
       gps->open(host.c_str(), port_s);
