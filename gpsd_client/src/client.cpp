@@ -53,6 +53,9 @@ class GPSDClient {
 
     void step() {
 #if GPSD_API_MAJOR_VERSION >= 5
+      if (!gps->waiting(1e6))
+        return;
+
       gps_data_t *p = gps->read();
 #else
       gps_data_t *p = gps->poll();
