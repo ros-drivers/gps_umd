@@ -1,3 +1,0 @@
-libgps:
-  ubuntu: libgps-dev
-  fedora: gpsd-devel

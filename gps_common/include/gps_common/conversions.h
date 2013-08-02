@@ -21,8 +21,8 @@
  */
 
 #include <cmath>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 namespace gps_common
 {
