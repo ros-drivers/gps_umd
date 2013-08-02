@@ -6,6 +6,9 @@
    using the NavSatFix message</description>
 
   <maintainer email="timo.roehling@fkie.fraunhofer.de">Timo Röhling</maintainer>
+  <author email="ken@tossell.net">Ken Tossell</author>
+  <author email="rob@umd.edu">Rob Thomson</author>
+
   <license>BSD</license>
   <url type="website">http://ros.org/wiki/gpsd_client</url>
 
