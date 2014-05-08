@@ -178,7 +178,7 @@ class GPSDClient {
 
       /* TODO: Support SBAS and other GBAS. */
 
-      if (use_gps_time)
+      if (use_gps_time && !isnan(p->fix.time))
         fix->header.stamp = ros::Time(p->fix.time);
       else
         fix->header.stamp = ros::Time::now();
