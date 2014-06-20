@@ -46,10 +46,10 @@ void callback(const sensor_msgs::NavSatFixConstPtr& fix) {
     odom.pose.pose.position.y = northing;
     odom.pose.pose.position.z = fix->altitude;
     
-    odom.pose.pose.orientation.x = 1;
+    odom.pose.pose.orientation.x = 0;
     odom.pose.pose.orientation.y = 0;
     odom.pose.pose.orientation.z = 0;
-    odom.pose.pose.orientation.w = 0;
+    odom.pose.pose.orientation.w = 1;
     
     // Use ENU covariance to build XYZRPY covariance
     boost::array<double, 36> covariance = {{
