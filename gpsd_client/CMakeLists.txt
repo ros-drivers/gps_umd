@@ -26,6 +26,7 @@ catkin_package()
 
 include_directories(${catkin_INCLUDE_DIRS} ${libgps_INCLUDE_DIRS})
 add_executable(${PROJECT_NAME} src/client.cpp)
+add_dependencies(${PROJECT_NAME} gps_common_generate_messages_cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${libgps_LIBRARIES})
 
 #############
