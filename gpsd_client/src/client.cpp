@@ -110,7 +110,7 @@ class GPSDClient {
 
       status.satellite_used_prn.resize(status.satellites_used);
       for (int i = 0; i < status.satellites_used; ++i) {
-#if GPSD_API_MAJOR_VERSION >= 4
+#if GPSD_API_MAJOR_VERSION >= 6
         status.satellite_used_prn[i] = p->skyview[i].used;
 #else
         status.satellite_used_prn[i] = p->used[i];
@@ -125,7 +125,7 @@ class GPSDClient {
       status.satellite_visible_snr.resize(status.satellites_visible);
 
       for (int i = 0; i < SATS_VISIBLE; ++i) {
-#if GPSD_API_MAJOR_VERSION >= 4
+#if GPSD_API_MAJOR_VERSION >= 6
         status.satellite_visible_prn[i] = p->skyview[i].PRN;
         status.satellite_visible_z[i] = p->skyview[i].elevation;
         status.satellite_visible_azimuth[i] = p->skyview[i].azimuth;
@@ -142,8 +142,8 @@ class GPSDClient {
         status.status = 0; // FIXME: gpsmm puts its constants in the global
                            // namespace, so `GPSStatus::STATUS_FIX' is illegal.
 
-#if GPSD_API_MAJOR_VERSION == 3
-        // STATUS_DPGS_FIX is not in GPSD 4.x.x
+#if GPSD_API_MAJOR_VERSION < 6
+        // STATUS_DPGS_FIX is not in GPSD 6.x.x
         if (p->status & STATUS_DGPS_FIX)
           status.status |= 18; // same here
 #endif
@@ -208,7 +208,7 @@ class GPSDClient {
         case STATUS_FIX:
           fix->status.status = 0; // NavSatStatus::STATUS_FIX;
           break;
-#if GPSD_API_MAJOR_VERSION == 3
+#if GPSD_API_MAJOR_VERSION < 6
         case STATUS_DGPS_FIX:
           fix->status.status = 2; // NavSatStatus::STATUS_GBAS_FIX;
           break;
